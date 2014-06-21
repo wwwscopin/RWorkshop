@@ -183,8 +183,15 @@ varImp(rf)</code></pre>
 <h2>Check the model with cross validation:</h2>
 <p>Through cross-validation on testing data, we can get the accuracy from Random Forest model: The accuracy is pretty high, I doubt it is true or something wrong here?</p>
 <pre class="r"><code>pred&lt;-predict(rf,testing)
-
-check= (testing$classe == pred)
+table(pred,testing$classe)</code></pre>
+<pre><code>##     
+## pred    A    B    C    D    E
+##    A 1674    0    0    0    0
+##    B    0 1139    3    0    0
+##    C    0    0 1023    2    0
+##    D    0    0    0  962    1
+##    E    0    0    0    0 1081</code></pre>
+<pre class="r"><code>check= (testing$classe == pred)
 accuracy&lt;-length(check[check == TRUE]) / length(check);
 accuracy</code></pre>
 <pre><code>## [1] 0.999</code></pre>

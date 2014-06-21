@@ -187,7 +187,20 @@ The accuracy is pretty high, I doubt it is true or something wrong here?
 
 ```r
 pred<-predict(rf,testing)
+table(pred,testing$classe)
+```
 
+```
+##     
+## pred    A    B    C    D    E
+##    A 1672    2    0    0    0
+##    B    2 1137    1    0    0
+##    C    0    0 1023    0    0
+##    D    0    0    2  964    0
+##    E    0    0    0    0 1082
+```
+
+```r
 check= (testing$classe == pred)
 accuracy<-length(check[check == TRUE]) / length(check);
 accuracy

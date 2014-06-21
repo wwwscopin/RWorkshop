@@ -89,6 +89,7 @@ The accuracy is pretty high, I doubt it is true or something wrong here?
 
 ```{r,echo=TRUE,cache=TRUE}
 pred<-predict(rf,testing)
+table(pred,testing$classe)
 
 check= (testing$classe == pred)
 accuracy<-length(check[check == TRUE]) / length(check);
