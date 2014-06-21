@@ -218,8 +218,8 @@ accuracy
 one<-testing[which(testing$new_window=='yes')[1],1:59]
 test<-rbind(test, one)
 
-final<-predict(rf,test)[1:20]
-final
+answer<-predict(rf,test)[1:20]
+answer
 ```
 
 ```

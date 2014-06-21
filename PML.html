@@ -202,8 +202,8 @@ accuracy</code></pre>
 one&lt;-testing[which(testing$new_window=='yes')[1],1:59]
 test&lt;-rbind(test, one)
 
-final&lt;-predict(rf,test)[1:20]
-final</code></pre>
+answer&lt;-predict(rf,test)[1:20]
+answer</code></pre>
 <pre><code>##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
 ##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
 ## Levels: A B C D E</code></pre>
