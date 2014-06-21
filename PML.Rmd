@@ -1,0 +1,109 @@
+---
+title: "Predict the Manner of Exercise"
+author: "Baohua Wu"
+date: "06/20/2014"
+output: html_document
+---
+
+## Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, 6 participants were asked to perform barbell lifts correctly and incorrectly in 5 different ways, the relevant data from accelerometers on the belt, forearm, arm, and dumbell was collected. The goal of this project is to predict the manner in which they did the exercise.
+
+## Data and Preprocessing
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. There are a lot of missing values in many of the variables. Only those variables has less than 10 percent of missing values will be used in our model building.
+
+
+```{r,echo=TRUE,cache=TRUE}
+raw0<-read.csv("pml-training.csv", header=TRUE, na.strings=c("NA",""))
+## The raw data size is:
+dim(raw0)
+##
+NAs <- apply(raw0,2,function(x) {sum(is.na(x))}) 
+raw1 <- raw0[,which(NAs <=1/10*length(raw0[,1]))]
+## After removing columns with more than 10% missing values, the data size is:
+dim(raw1)
+
+## Load required packages:
+
+require(lubridate)
+library(caret)
+library(tree)
+library(e1071)
+library(randomForest)
+```
+
+In the raw data, one of the column has date/time in factor format, here we transfere it into 2 variables: Date and Time
+
+```{r, echo=FALSE,cache=TRUE}
+classe<-raw1$classe
+wbh<-as.POSIXct(levels(raw1$cvtd_timestamp)[raw1$cvtd_timestamp], format="%d/%m/%Y %H:%M")
+raw1$Date<-as.Date(wbh)
+raw1$HM<-hour(wbh)+minute(wbh)/60
+raw1<-raw1[, !names(raw1) %in% c("X","cvtd_timestamp", "classe")]
+raw<-cbind(raw1,classe)
+```
+
+The raw data was splitted into training and testing data set with ratio of 7:3:
+
+```{r, echo=FALSE,cache=TRUE}
+Index <- createDataPartition(y = raw$classe, p=0.7,list=FALSE) # 3927 rows
+training <- raw[Index,]
+testing <- raw[-Index,]
+table(training$classe)
+```
+
+The data would be used for prediction was loaded and followed the same preprocessing as the raw data.
+Also, only those same columns as raw data was kept for later prediction:
+
+```{r, echo=FALSE,cache=TRUE}
+rawtest<-read.csv("pml-testing.csv", header=TRUE, na.strings=c("NA",""))
+wbh1<-as.POSIXct(levels(rawtest$cvtd_timestamp )[rawtest$cvtd_timestamp], format="%d/%m/%Y %H:%M")
+rawtest$Date<-as.Date(wbh1)
+rawtest$HM<-hour(wbh1)+minute(wbh1)/60
+test<-rawtest[,colnames(rawtest) %in% colnames(raw)]
+
+#Check type match!
+#mark=sapply(test,class)==sapply(testing,class)
+#mark[mark==FALSE]
+
+## Here to change the attribute of some variables, otherwise won't work when used for prediction
+test$magnet_dumbbell_z<-as.numeric(test$magnet_dumbbell_z)
+test$magnet_forearm_y<-as.numeric(test$magnet_forearm_y)
+test$magnet_forearm_z<-as.numeric(test$magnet_forearm_z)
+```
+
+## Model building using Random forest:
+
+```{r,echo=TRUE,cache=TRUE}
+rf<-randomForest(classe~.,data=training, importance=TRUE, na.action = na.omit)
+## The error rate from Random Forest:
+rf
+## List of Important variables by random Forest:
+varImp(rf)
+```
+
+## Check the model with cross validation:
+
+Through cross-validation on testing data, we can get the accuracy from Random Forest model:
+The accuracy is pretty high, I doubt it is true or something wrong here?
+
+```{r,echo=TRUE,cache=TRUE}
+pred<-predict(rf,testing)
+
+check= (testing$classe == pred)
+accuracy<-length(check[check == TRUE]) / length(check);
+accuracy
+```
+
+## Prediction for the new data:
+
+```{r,echo=TRUE,cache=TRUE}
+
+## Fake one case with level='yea', otherwise won't work!
+one<-testing[which(testing$new_window=='yes')[1],1:59]
+test<-rbind(one, test)
+
+final<-predict(rf,test)[-1]
+final
+```
+
