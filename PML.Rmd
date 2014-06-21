@@ -105,6 +105,21 @@ one<-testing[which(testing$new_window=='yes')[1],1:59]
 test<-rbind(test, one)
 
 answer<-predict(rf,test)[1:20]
-answer
+answers<-as.character(answer)
+answers
 ```
+
+## To submit 
+
+```{r,echo=TRUE,cache=TRUE}
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+pml_write_files(answers)
+```
+
 
