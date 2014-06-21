@@ -101,9 +101,9 @@ accuracy
 
 ## Fake one case with level='yea', otherwise won't work!
 one<-testing[which(testing$new_window=='yes')[1],1:59]
-test<-rbind(one, test)
+test<-rbind(test, one)
 
-final<-predict(rf,test)[-1]
+final<-predict(rf,test)[1:20]
 final
 ```
 
